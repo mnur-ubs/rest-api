@@ -1,14 +1,19 @@
-import express from 'express';
+import express, { json, urlencoded } from 'express';
 import bodyParser from 'body-parser';
 import url from 'url';
 import querystring from 'querystring';
 import db from './database/sqlite';
 import { body, validationResult } from 'express-validator';
+import AuthMiddleware from './middleware/auth.middleware.js';
+import jwt from './helper/jwt.helper.js';
+import { log } from 'console';
+import sha256 from 'sha256';
 
 const app = express();
 const PORT = 3000;
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(AuthMiddleware);
 
 app.get('/', (req, res) => {
     res.status(200).json({
@@ -16,6 +21,52 @@ app.get('/', (req, res) => {
         success: true,
         message: 'Welcome to Web Service Univ. Bani Saleh'
     });
+});
+
+app.post('/login', [
+    body('email', 'Email is required').notEmpty(),
+    body('email', 'Email is not valid').isEmail(),
+    body('password', 'Password is required').notEmpty(),
+], (req, res) => {
+    const errors = validationResult(req);
+    if (errors.isEmpty()) {
+        const {email, password} = req.body;
+        db.get("SELECT * FROM user WHERE email=?", [email], (err, data) => {
+            if (err) {
+                if (err) {
+                    return res.status(500).json({
+                        status: 500,
+                        success: false,
+                        message: err?.message || 'Internal server error'
+                    })
+                } 
+            } else { 
+                if (!data) {
+                    return res.status(401).json({
+                        status: 401,
+                        success: false,
+                        message: err?.message || 'User not found'
+                    })
+                }
+                const userPassword = data?.password;
+                if (sha256(password) == userPassword) {
+                    delete data.password;
+                    const [payload, token] = jwt.createToken({
+                        data
+                    });
+                    res.json({ success: true, user: data, access_token: token });
+                } else {
+                    res.status(401).json({
+                        status: 401,
+                        success: false, 
+                        message: 'Incorrect password'
+                    });
+                } 
+            }
+        })
+    } else {
+        return res.status(422).json({ errors: errors.array() });
+    }
 });
 
 app.get('/products', (req, res) => {
