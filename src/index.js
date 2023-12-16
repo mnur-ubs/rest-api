@@ -2,7 +2,7 @@ import express, { json, urlencoded } from 'express';
 import bodyParser from 'body-parser';
 import url from 'url';
 import querystring from 'querystring';
-import db from './database/sqlite';
+import db from './database/sqlite.js';
 import { body, validationResult } from 'express-validator';
 import AuthMiddleware from './middleware/auth.middleware.js';
 import jwt from './helper/jwt.helper.js';
