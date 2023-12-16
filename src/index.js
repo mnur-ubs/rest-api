@@ -41,6 +41,7 @@ app.post('/login', [
                     })
                 } 
             } else { 
+                console.log('data', data);
                 if (!data) {
                     return res.status(401).json({
                         status: 401,
