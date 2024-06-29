@@ -13,7 +13,7 @@ const app = express();
 const PORT = 3000;
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(AuthMiddleware);
+// app.use(AuthMiddleware);
 
 app.get('/', (req, res) => {
     res.status(200).json({
