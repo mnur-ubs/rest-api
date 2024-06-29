@@ -13,7 +13,7 @@ const app = express();
 const PORT = 3000;
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(AuthMiddleware);
+// app.use(AuthMiddleware);
 
 app.get('/', (req, res) => {
     res.status(200).json({
@@ -30,7 +30,7 @@ app.post('/login', [
 ], (req, res) => {
     const errors = validationResult(req);
     if (errors.isEmpty()) {
-        const {email, password} = req.body;
+        const { email, password } = req.body;
         db.get("SELECT * FROM user WHERE email=?", [email], (err, data) => {
             if (err) {
                 if (err) {
@@ -39,8 +39,8 @@ app.post('/login', [
                         success: false,
                         message: err?.message || 'Internal server error'
                     })
-                } 
-            } else { 
+                }
+            } else {
                 console.log('data', data);
                 if (!data) {
                     return res.status(401).json({
@@ -59,10 +59,10 @@ app.post('/login', [
                 } else {
                     res.status(401).json({
                         status: 401,
-                        success: false, 
+                        success: false,
                         message: 'Incorrect password'
                     });
-                } 
+                }
             }
         })
     } else {
